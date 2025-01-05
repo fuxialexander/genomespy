@@ -259,7 +259,6 @@ class GenomeSpy:
         shared_path = Path(__file__).parent / 'shared'
         dest_shared = Path.cwd() / '.genomespy_shared'
         shutil.copytree(shared_path, dest_shared, dirs_exist_ok=True)
-
         self.httpd = HTTPServer(('localhost', self._server_port), RangeRequestHandler)
         
         def server_thread():
@@ -442,6 +441,14 @@ class GenomeSpy:
                     shutil.rmtree('.genomespy_shared')
             except OSError:
                 pass  # Ignore errors during cleanup
+
+    def cleanup(self):
+        """Cleanup all temporary files, including from previous runs."""
+        for file in os.listdir():
+            if file.startswith('.genomespy_temp_'):
+                os.remove(file)
+        if os.path.exists('.genomespy_shared'):
+            shutil.rmtree('.genomespy_shared')
 
     def data(self, data: Union[pd.DataFrame, np.ndarray, str], format: str = "json"):
         """Set the data for the visualization.
@@ -1204,6 +1211,30 @@ class GenomeSpy:
         }
         return self
 
+    def show_gradio(self, filename=None):
+        """Return the HTML content for Gradio integration.
+
+        Returns
+        -------
+        str
+            The HTML representation of the visualization.
+        """
+        if filename is None:
+            filename = f'.genomespy_temp_{os.getpid()}.html'
+        # Ensure the server is started
+        if not hasattr(self, 'httpd'):
+            self._start_server()
+
+        # save the html file
+        with open(filename, 'w') as f:
+            f.write(self._repr_html_())
+        
+        # Use IPython's IFrame to generate the HTML content
+        iframe = IFrame(src=f'http://localhost:{self.server_port}/{filename}', width='100%', height=600)
+        
+        # Return the HTML representation of the IFrame
+        return iframe._repr_html_()
+
 # Additional helper functions and classes can be added here as needed. 
 
 def _get_track_height(track_spec):
@@ -1346,7 +1377,7 @@ def create_base_spec(region: Dict[str, Any]) -> Dict[str, Any]:
         ]
     }
 
-def igv(file_dict: Dict[str, Dict[str, Any]], region: Optional[Dict[str, Any]] = None, height: int = 600, server_port: int = 18089) -> GenomeSpy:
+def igv(file_dict: Dict[str, Dict[str, Any]], region: Optional[Dict[str, Any]] = None, height: int = 600, server_port: int = 18089, gs: GenomeSpy = None) -> GenomeSpy:
     """Create a GenomeSpy visualization with custom tracks in IGV style.
 
     This function creates a genome browser visualization similar to IGV (Integrative Genomics Viewer),
@@ -1366,6 +1397,12 @@ def igv(file_dict: Dict[str, Dict[str, Any]], region: Optional[Dict[str, Any]] =
         - chrom : Chromosome name
         - start : Start position
         - end : End position
+    height : int, optional
+        The height of the visualization in pixels, by default 600
+    server_port : int, optional
+        The port number for the GenomeSpy server, by default 18089
+    gs : GenomeSpy, optional
+        An existing GenomeSpy instance to reuse, by default None
 
     Returns
     -------
@@ -1391,7 +1428,11 @@ def igv(file_dict: Dict[str, Dict[str, Any]], region: Optional[Dict[str, Any]] =
     >>> plot.show()
     """
     region = region or DEFAULT_REGION
-    gs = GenomeSpy(height=height, server_port=server_port)
+    if gs is None:
+        gs = GenomeSpy(height=height, server_port=server_port)
+    else:
+        gs.server_port = server_port
+        gs.height = height
     
     # Create base specification
     spec = create_base_spec(region)

@@ -61,6 +61,8 @@ Note: When running on a remote server, you'll need to set up port forwarding to 
 
 For other IDEs/environments, consult their documentation on port forwarding.
 
+You can also use genomespy with gradio. Check out the example in [example_gradio.py](example_gradio.py).
+
 ## Documentation
 
 Comprehensive documentation is available at [genomespy.readthedocs.io](https://genomespy.readthedocs.io/), including:
