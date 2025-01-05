@@ -182,7 +182,7 @@ class GenomeSpy:
     - Composable visualization grammar
     """
     
-    def __init__(self, height: int = 600):
+    def __init__(self, height: int = 600, server_port: int = 18089):
         """Initialize a GenomeSpy instance.
 
         Args:
@@ -200,7 +200,7 @@ class GenomeSpy:
             "parameters": {},
             "expressions": {},
         }
-        self._server_port = None
+        self._server_port = server_port
         self._template = self._load_template()
     
     @staticmethod
@@ -257,17 +257,23 @@ class GenomeSpy:
         dest_shared = Path.cwd() / '.genomespy_shared'
         shutil.copytree(shared_path, dest_shared, dirs_exist_ok=True)
         def server_thread():
-            httpd = HTTPServer(('127.0.0.1', 0), RangeRequestHandler)
-            self._server_port = httpd.server_port
+            httpd = HTTPServer(('localhost', self._server_port), RangeRequestHandler)
             httpd.serve_forever()
         
         thread = Thread(target=server_thread)
         thread.daemon = True
         thread.start()
+        self.server_thread = thread
         
         # Give the server time to start
         import time
         time.sleep(0.1)
+    
+    def _stop_server(self):
+        """Stop the local HTTP server."""
+        if hasattr(self, 'server_thread') and self.server_thread:
+            self.server_thread.join()
+            self.server_thread = None
 
     def load_spec(self, spec: Union[str, Dict[str, Any]], is_url: bool = False):
         """Load a GenomeSpy specification.
@@ -317,7 +323,7 @@ class GenomeSpy:
                         # Convert local file path to server URL
                         file_path = lazy_data["url"]
                         if os.path.exists(file_path):
-                            lazy_data["url"] = f"http://127.0.0.1:{self._server_port}/{file_path}"
+                            lazy_data["url"] = f"http://localhost:{self._server_port}/{file_path}"
 
             # Recursively process all dictionary values
             for key, value in spec_obj.items():
@@ -367,25 +373,14 @@ class GenomeSpy:
         try:
             from IPython.display import display
             
-            # Start local HTTP server in a separate thread
-            def start_server():
-                httpd = HTTPServer(('127.0.0.1', 0), RangeRequestHandler)
-                self._server_port = httpd.server_port
-                httpd.serve_forever()
-            
-            server_thread = Thread(target=start_server)
-            server_thread.daemon = True
-            server_thread.start()
-            
-            # Give the server a moment to start
-            import time
-            time.sleep(0.1)
+            # start the server
+            self._start_server()
             
             # Now process the spec and save the HTML
             self.save_html(filename)
             
             return display(IFrame(
-                src=f'http://127.0.0.1:{self._server_port}/{os.path.basename(filename)}',
+                src=f'http://localhost:{self._server_port}/{os.path.basename(filename)}',
                 width='100%',
                 height=self.height + 40
             ))
@@ -420,9 +415,8 @@ class GenomeSpy:
         >>> plot.show()
         >>> plot.close()  # Cleanup when done
         """
-        if hasattr(self, '_server_port') and self._server_port:
-            self._server_port = None
-        
+        # stop the server
+        self._stop_server()
         # Cleanup temporary files
         current_pid = os.getpid()
         temp_file = f'.genomespy_temp_{current_pid}.html'
@@ -1342,7 +1336,7 @@ def create_base_spec(region: Dict[str, Any]) -> Dict[str, Any]:
         ]
     }
 
-def igv(file_dict: Dict[str, Dict[str, Any]], region: Optional[Dict[str, Any]] = None) -> GenomeSpy:
+def igv(file_dict: Dict[str, Dict[str, Any]], region: Optional[Dict[str, Any]] = None, height: int = 600, server_port: int = 18089) -> GenomeSpy:
     """Create a GenomeSpy visualization with custom tracks in IGV style.
 
     This function creates a genome browser visualization similar to IGV (Integrative Genomics Viewer),
@@ -1387,10 +1381,7 @@ def igv(file_dict: Dict[str, Dict[str, Any]], region: Optional[Dict[str, Any]] =
     >>> plot.show()
     """
     region = region or DEFAULT_REGION
-    gs = GenomeSpy()
-    
-    # Start server
-    gs._start_server()
+    gs = GenomeSpy(height=height, server_port=server_port)
     
     # Create base specification
     spec = create_base_spec(region)
