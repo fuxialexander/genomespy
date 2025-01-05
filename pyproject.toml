@@ -87,3 +87,22 @@ addopts = "-ra -q"
 testpaths = [
     "tests",
 ]
+
+[tool.poetry]
+include = ["src/genomespy/shared/*"]
+
+[tool.setuptools.package-data]
+genomespy = ["src/genomespy/shared/*"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/genomespy"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/genomespy/shared/*",
+]
+
+[tool.hatch.build]
+artifacts = [
+    "src/genomespy/shared/*",
+]

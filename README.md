@@ -6,6 +6,8 @@
 
 GenomeSpy is a Python wrapper for the JavaScript visualization grammar library [GenomeSpy](https://genomespy.app). It enables the creation of interactive, GPU-accelerated genomic visualizations through a declarative grammar.
 
+![GenomeSpy Demo](static/demo.png)
+
 The Python package provides a high-level interface to create GenomeSpy visualizations. Under the hood, it:
 
 - Generates JSON specifications that GenomeSpy can interpret

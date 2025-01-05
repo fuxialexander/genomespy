@@ -1,6 +1,8 @@
 import json
 import os
+from pathlib import Path
 import re
+import shutil
 import webbrowser
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from threading import Thread
@@ -250,6 +252,10 @@ class GenomeSpy:
 
     def _start_server(self):
         """Start the local HTTP server."""
+        # copy the shared directory to the current working directory
+        shared_path = Path(__file__).parent / 'shared'
+        dest_shared = Path.cwd() / '.genomespy_shared'
+        shutil.copytree(shared_path, dest_shared)
         def server_thread():
             httpd = HTTPServer(('localhost', 0), RangeRequestHandler)
             self._server_port = httpd.server_port
@@ -427,6 +433,9 @@ class GenomeSpy:
                 for file in os.listdir():
                     if file.startswith('.genomespy_temp_'):
                         os.remove(file)
+                # also remove the shared directory
+                if os.path.exists('.genomespy_shared'):
+                    shutil.rmtree('.genomespy_shared')
             except OSError:
                 pass  # Ignore errors during cleanup
 
@@ -758,7 +767,7 @@ class GenomeSpy:
 
         Built-in Views
         -------------
-        The following views are available in the shared/ directory:
+        The following views are available in the .genomespy_shared/ directory:
         - cytobands.json : Chromosome ideogram track
         - genes.json : Gene annotation track
         - hg38.json : Reference genome sequence
@@ -767,13 +776,13 @@ class GenomeSpy:
         --------
         >>> plot = GenomeSpy()
         >>> # Import chromosome ideogram
-        >>> plot.import_view("shared/cytobands.json")
+        >>> plot.import_view(".genomespy_shared/cytobands.json")
         >>> 
         >>> # Import gene annotations
-        >>> plot.import_view("shared/genes.json")
+        >>> plot.import_view(".genomespy_shared/genes.json")
         >>> 
         >>> # Import reference genome
-        >>> plot.import_view("shared/hg38.json")
+        >>> plot.import_view(".genomespy_shared/hg38.json")
         """
         self.spec["views"].append({"import": {"url": url}})
         return self
@@ -1327,9 +1336,9 @@ def create_base_spec(region: Dict[str, Any]) -> Dict[str, Any]:
         "genome": {"name": "hg38"},
         "resolve": {"axis": {"x": "shared"}},
         "vconcat": [
-            {"import": {"url": "shared/cytobands.json"}},
-            {"import": {"url": "shared/genes.json"}},
-            {"import": {"url": "shared/hg38.json"}}
+            {"import": {"url": ".genomespy_shared/cytobands.json"}},
+            {"import": {"url": ".genomespy_shared/genes.json"}},
+            {"import": {"url": ".genomespy_shared/hg38.json"}}
         ]
     }
 
