@@ -10,16 +10,18 @@ Here's a simple example of using GenomeSpy:
 
 .. code-block:: python
 
-    import genomespy as gs
+    import pandas as pd
 
-    # Create a visualization
-    vis = gs.Visualization()
+    from genomespy import GenomeSpy, igv
 
-    # Add your data and configure the visualization
-    # (Add specific examples based on your package's functionality)
-
-    # Display the visualization
-    vis.show()
+    tracks = {
+        "ZBTB7A": {
+            "url": "https://chip-atlas.dbcls.jp/data/hg38/eachData/bw/SRX3161009.bw",
+            "height": 40,
+            "type": "bigwig"
+        }}
+    plot = igv(tracks, region={"chrom": "chr7", "start": 66600000, "end": 66800000})
+    plot.show()
 
 Advanced Features
 ---------------
