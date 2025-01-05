@@ -257,7 +257,7 @@ class GenomeSpy:
         dest_shared = Path.cwd() / '.genomespy_shared'
         shutil.copytree(shared_path, dest_shared, dirs_exist_ok=True)
         def server_thread():
-            httpd = HTTPServer(('localhost', 0), RangeRequestHandler)
+            httpd = HTTPServer(('127.0.0.1', 0), RangeRequestHandler)
             self._server_port = httpd.server_port
             httpd.serve_forever()
         
@@ -317,7 +317,7 @@ class GenomeSpy:
                         # Convert local file path to server URL
                         file_path = lazy_data["url"]
                         if os.path.exists(file_path):
-                            lazy_data["url"] = f"http://localhost:{self._server_port}/{file_path}"
+                            lazy_data["url"] = f"http://127.0.0.1:{self._server_port}/{file_path}"
 
             # Recursively process all dictionary values
             for key, value in spec_obj.items():
@@ -369,7 +369,7 @@ class GenomeSpy:
             
             # Start local HTTP server in a separate thread
             def start_server():
-                httpd = HTTPServer(('localhost', 0), RangeRequestHandler)
+                httpd = HTTPServer(('127.0.0.1', 0), RangeRequestHandler)
                 self._server_port = httpd.server_port
                 httpd.serve_forever()
             
@@ -385,7 +385,7 @@ class GenomeSpy:
             self.save_html(filename)
             
             return display(IFrame(
-                src=f'http://localhost:{self._server_port}/{os.path.basename(filename)}',
+                src=f'http://127.0.0.1:{self._server_port}/{os.path.basename(filename)}',
                 width='100%',
                 height=self.height + 40
             ))
