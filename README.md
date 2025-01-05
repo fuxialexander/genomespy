@@ -39,31 +39,18 @@ pip install genomespy
 Here's a simple example to get you started:
 
 ```python
-import genomespy as gs
-import pandas as pd
+from genomespy import igv
 
-# Create sample genomic data
-data = pd.DataFrame({
-    'chromosome': ['chr1', 'chr1', 'chr2'],
-    'start': [1000, 2000, 1500],
-    'end': [1500, 2500, 2000],
-    'value': [1.5, 2.0, 1.8]
-})
+tracks = {
+    "ZBTB7A": {
+        "url": "https://chip-atlas.dbcls.jp/data/hg38/eachData/bw/SRX3161009.bw",
+        "height": 40,
+        "type": "bigwig"
+    }}
+plot = igv(tracks, region={"chrom": "chr7", "start": 66600000, "end": 66800000}, server_port=18089)
+plot.show()
 
-# Create visualization
-vis = gs.GenomeSpy()
-
-# Configure the visualization
-vis.mark("rect", tooltip={"content": "data"})
-vis.encode(
-    x={"chrom": "chromosome", "pos": "start", "type": "locus"},
-    x2={"chrom": "chromosome", "pos": "end"},
-    y={"field": "value", "type": "quantitative"},
-    color={"field": "value", "type": "quantitative"}
-)
-
-# Display the visualization
-vis.show()
+# plot.close() when you finished visualization
 ```
 
 ## Documentation
