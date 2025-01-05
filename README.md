@@ -53,6 +53,14 @@ plot.show()
 # plot.close() when you finished visualization
 ```
 
+Note: When running on a remote server, you'll need to set up port forwarding to access the visualization locally. The default port is 18089, but this can be customized. In VS Code, you can set up port forwarding by:
+
+1. Opening the "PORTS" tab in the bottom panel
+2. Clicking "Forward a Port" 
+3. Entering port 18089 (or your chosen port)
+
+For other IDEs/environments, consult their documentation on port forwarding.
+
 ## Documentation
 
 Comprehensive documentation is available at [genomespy.readthedocs.io](https://genomespy.readthedocs.io/), including:
