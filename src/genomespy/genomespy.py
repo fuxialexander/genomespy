@@ -252,28 +252,33 @@ class GenomeSpy:
 
     def _start_server(self):
         """Start the local HTTP server."""
-        # copy the shared directory to the current working directory
         shared_path = Path(__file__).parent / 'shared'
         dest_shared = Path.cwd() / '.genomespy_shared'
         shutil.copytree(shared_path, dest_shared, dirs_exist_ok=True)
+
+        self.httpd = HTTPServer(('localhost', self._server_port), RangeRequestHandler)
+        
         def server_thread():
-            httpd = HTTPServer(('localhost', self._server_port), RangeRequestHandler)
-            httpd.serve_forever()
+            print(f"Starting server on port {self._server_port}...")
+            try:
+                self.httpd.serve_forever()
+            except Exception as e:
+                print(f"Server error: {e}")
+            finally:
+                self.httpd.server_close()
+                print("Server stopped.")
         
         thread = Thread(target=server_thread)
         thread.daemon = True
         thread.start()
         self.server_thread = thread
-        
-        # Give the server time to start
-        import time
-        time.sleep(0.1)
-    
+
     def _stop_server(self):
         """Stop the local HTTP server."""
-        if hasattr(self, 'server_thread') and self.server_thread:
-            self.server_thread.join()
-            self.server_thread = None
+        if hasattr(self, 'httpd'):
+            self.httpd.shutdown()  # This will stop the serve_forever loop
+            self.server_thread.join()  # Wait for the server thread to finish
+            print("Server shutdown requested.")
 
     def load_spec(self, spec: Union[str, Dict[str, Any]], is_url: bool = False):
         """Load a GenomeSpy specification.
