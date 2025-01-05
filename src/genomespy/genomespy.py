@@ -255,7 +255,7 @@ class GenomeSpy:
         # copy the shared directory to the current working directory
         shared_path = Path(__file__).parent / 'shared'
         dest_shared = Path.cwd() / '.genomespy_shared'
-        shutil.copytree(shared_path, dest_shared)
+        shutil.copytree(shared_path, dest_shared, dirs_exist_ok=True)
         def server_thread():
             httpd = HTTPServer(('localhost', 0), RangeRequestHandler)
             self._server_port = httpd.server_port
