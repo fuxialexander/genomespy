@@ -185,8 +185,12 @@ class GenomeSpy:
     def __init__(self, height: int = 600, server_port: int = 18089):
         """Initialize a GenomeSpy instance.
 
-        Args:
-            height (int, optional): The height of the visualization. Defaults to 600.
+        Parameters
+        ----------
+        height : int, optional
+            The height of the visualization in pixels, by default 600
+        server_port : int, optional
+            The port number of the local HTTP server, by default 18089
         """
         self.height = height
         self.spec = {
@@ -259,7 +263,7 @@ class GenomeSpy:
         self.httpd = HTTPServer(('localhost', self._server_port), RangeRequestHandler)
         
         def server_thread():
-            print(f"Starting server on port {self._server_port}...")
+            print(f"Starting server on port {self._server_port}... remember to port forward if you are running this on a remote server")
             try:
                 self.httpd.serve_forever()
             except Exception as e:
@@ -378,8 +382,9 @@ class GenomeSpy:
         try:
             from IPython.display import display
             
-            # start the server
-            self._start_server()
+            if not hasattr(self, 'httpd'):  # if the server is not already running, start it
+                # start the server
+                self._start_server()
             
             # Now process the spec and save the HTML
             self.save_html(filename)

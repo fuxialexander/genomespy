@@ -20,10 +20,11 @@ Here's a simple example of using GenomeSpy:
             "height": 40,
             "type": "bigwig"
         }}
-    plot = igv(tracks, region={"chrom": "chr7", "start": 66600000, "end": 66800000})
+    plot = igv(tracks, region={"chrom": "chr7", "start": 66600000, "end": 66800000}, server_port=18089)
     plot.show()
 
-Advanced Features
----------------
+Note
+----
 
-(Add more sections based on your package's features) 
+If you are running this on a remote server, you need to port forward the server port to your local machine.
+In vscode, you can do this by clicking the "Ports" button in the bottom panel and then clicking the "+" button to add a new port forward.
