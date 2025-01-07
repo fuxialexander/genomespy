@@ -21,13 +21,7 @@
       "x": {
         "chrom": "chrom",
         "pos": "pos",
-        "type": "locus",
-        "scale": {
-          "domain": [
-            { "chrom": "chr7", "pos": 66600000 },
-            { "chrom": "chr7", "pos": 66800000 }
-          ]
-        }
+        "type": "locus"
       },
       "color": {
         "field": "base",
