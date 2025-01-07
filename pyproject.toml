@@ -25,7 +25,7 @@ classifiers = [
 dependencies = [
     "numpy",
     "pandas",
-    "ipython>=8.30.0",
+    "ipython",
     "scipy"
 ]
 
