@@ -31,7 +31,7 @@ class RangeRequestHandler(SimpleHTTPRequestHandler):
         BINARY_EXTENSIONS (list): List of file extensions considered as binary.
     """
     
-    BINARY_EXTENSIONS = ['.bw', '.bigwig', '.bb', '.bigbed']
+    BINARY_EXTENSIONS = ['.bw', '.bigwig', ]
     
     def log_message(self, format, *args):
         pass
